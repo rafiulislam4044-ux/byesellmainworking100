@@ -1,8 +1,13 @@
 import { ethers } from "ethers";
 
 // Alchemy as primary, public RPCs as fallback
-const ALCHEMY_RPC = "https://base-mainnet.g.alchemy.com/v2/29GZtDKzDJu0PgmRG8iOz";
-const ALCHEMY_WSS = "wss://base-mainnet.g.alchemy.com/v2/29GZtDKzDJu0PgmRG8iOz";
+const ALCHEMY_KEY = import.meta.env.VITE_ALCHEMY_API_KEY || "";
+const ALCHEMY_RPC = ALCHEMY_KEY 
+  ? `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
+  : "https://mainnet.base.org";
+const ALCHEMY_WSS = ALCHEMY_KEY
+  ? `wss://base-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
+  : "";
 
 const BASE_RPC_URLS = [
   ALCHEMY_RPC,
@@ -54,6 +59,10 @@ export function getBaseProvider(): ethers.FallbackProvider {
 export function getWsProvider(): ethers.WebSocketProvider | null {
   if (_wsProvider) return _wsProvider;
   try {
+    if (!ALCHEMY_WSS) {
+      console.warn("Alchemy WSS not configured, using HTTP fallback");
+      return null;
+    }
     _wsProvider = new ethers.WebSocketProvider(ALCHEMY_WSS, {
       chainId: 8453,
       name: "base",
