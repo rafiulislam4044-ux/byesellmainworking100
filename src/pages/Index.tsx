@@ -6,15 +6,19 @@ import { useWallet } from "@/hooks/useWallet";
 import { useTokenInfo } from "@/hooks/useTokenInfo";
 
 const Index = () => {
-  const wallet = useWallet();
-  const token = useTokenInfo(wallet.address || undefined);
+  try {
+    console.log("[v0] Index page rendering");
+    const wallet = useWallet();
+    console.log("[v0] Wallet hook initialized:", wallet.address);
+    const token = useTokenInfo(wallet.address || undefined);
+    console.log("[v0] Token hook initialized");
 
-  const handleTradeComplete = () => {
-    wallet.refreshBalance(wallet.address);
-    if (token.tokenInfo) {
-      token.fetchAll(token.tokenInfo.address);
-    }
-  };
+    const handleTradeComplete = () => {
+      wallet.refreshBalance(wallet.address);
+      if (token.tokenInfo) {
+        token.fetchAll(token.tokenInfo.address);
+      }
+    };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -108,7 +112,26 @@ const Index = () => {
         </p>
       </footer>
     </div>
-  );
+    );
+  } catch (error) {
+    console.error("[v0] Error in Index page:", error);
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Error Loading Page</h1>
+          <pre className="text-sm text-muted-foreground bg-card p-4 rounded-md overflow-auto max-h-64 text-left">
+            {String(error)}
+          </pre>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 };
 
 export default Index;
